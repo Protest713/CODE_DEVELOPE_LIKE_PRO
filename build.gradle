@@ -10,28 +10,41 @@ repositories {
 }
 
 dependencies {
+    // JUnit and Selenium dependencies
     testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
     testImplementation 'org.seleniumhq.selenium:selenium-java:4.8.3'
     testImplementation 'org.seleniumhq.selenium:selenium-chrome-driver:4.8.3'
     testImplementation 'org.seleniumhq.selenium:selenium-edge-driver:4.8.3'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+
+    // Cucumber dependencies (Java and TestNG integration)
+    testImplementation 'io.cucumber:cucumber-java:7.16.0'
+    testImplementation 'io.cucumber:cucumber-testng:7.16.0'
+
+    // WebDriverManager
+    testImplementation 'io.github.bonigarcia:webdrivermanager:5.3.2'
+
+    // TestNG
+    testImplementation 'org.testng:testng:7.8.0'
+
+    // Utility libraries
     implementation 'commons-codec:commons-codec:1.15'
     implementation 'commons-io:commons-io:2.8.0'
-    testImplementation 'io.cucumber:cucumber-java:7.16.0'
-    testImplementation 'io.cucumber:cucumber-junit:7.16.0'
-    testImplementation 'io.cucumber:cucumber-testng:7.16.0'
-    testImplementation 'io.github.bonigarcia:webdrivermanager:5.3.2'
-    testImplementation 'org.testng:testng:7.8.0'
+
+    // Database libraries
+    implementation 'mysql:mysql-connector-java:8.0.33'
+    implementation 'org.springframework:spring-jdbc:5.3.30'
+    implementation 'org.apache.commons:commons-dbcp2:2.9.0'
 }
 
-task runTests(type: Test) {
-    useTestNG() {
+tasks.register('runTests', Test) {
+    useTestNG {
         suites 'src/test/resources/testng.xml'
     }
 }
 
-test {
-    useJUnitPlatform()
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
