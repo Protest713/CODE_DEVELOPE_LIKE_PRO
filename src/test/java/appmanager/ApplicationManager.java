@@ -1,5 +1,6 @@
 package appmanager;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.edge.EdgeDriver;
@@ -34,6 +35,7 @@ public class ApplicationManager {
     private static void initializeWebDriver() {
         browser = reader.get("browser.type").toLowerCase();
         if ("chrome".equalsIgnoreCase(browser)) {
+            WebDriverManager.chromedriver().setup();
             driver = new ChromeDriver();
         } else if ("edge".equalsIgnoreCase(browser)) {
             driver = new EdgeDriver();

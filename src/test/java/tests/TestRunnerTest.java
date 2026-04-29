@@ -9,6 +9,7 @@ import io.cucumber.java.Scenario;
 import io.cucumber.testng.AbstractTestNGCucumberTests;
 import io.cucumber.testng.CucumberOptions;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 
@@ -16,17 +17,32 @@ import java.util.ArrayList;
         features = "src/test/resources/features",
         glue = "tests",
         tags = "@CG",
-        plugin = {"pretty", "html:target/cucumber-reports.html", "json:target/cucumber.json"}
+        plugin = {"pretty", "html:target/cucumber-reports.html"}
 )
-public class TestRunner extends AbstractTestNGCucumberTests {
+public class TestRunnerTest extends AbstractTestNGCucumberTests {
 
     private PropertyFileReader localReader = new PropertyFileReader("local.properties");
     static ArrayList<String> listOfScenarios = new ArrayList<>();
 
+    // ✅ IMPORTANT: This makes Gradle detect tests
+    @Override
+    @Test(dataProvider = "scenarios")
+    public void runScenario(io.cucumber.testng.PickleWrapper pickle,
+                            io.cucumber.testng.FeatureWrapper feature) {
+        super.runScenario(pickle, feature);
+    }
+
     @Before
     public void startScenario(Scenario scenario) {
-        String[] tagsToBeRun = localReader.get("tagsForVideoCapture").replaceAll("\\s+", "").split(",");
+        System.out.println("🚀 Scenario started: " + scenario.getName());
+
+        ApplicationManager.getWebDriver();
+
+        String[] tagsToBeRun = localReader.get("tagsForVideoCapture")
+                .replaceAll("\\s+", "").split(",");
+
         boolean shouldCapture = false;
+
         for (String tag : scenario.getSourceTagNames()) {
             for (String tagToBeRun : tagsToBeRun) {
                 if (tag.equalsIgnoreCase(tagToBeRun)) {
@@ -35,21 +51,28 @@ public class TestRunner extends AbstractTestNGCucumberTests {
                 }
             }
         }
+
         HelperBase.screenShotSwitch = shouldCapture;
-        if (shouldCapture) {
-            System.out.println("===============================" + scenario.getName() + "===============================");
-        }
     }
 
     @Override
-    @DataProvider(parallel = true)
+    @DataProvider(parallel = false)
     public Object[][] scenarios() {
         return super.scenarios();
     }
 
     @After
     public void endScenario(Scenario scenario) {
-        ApplicationManager.stop();
-        listOfScenarios.add(scenario.getStatus().name().toUpperCase() + " - " + scenario.getName());
+
+        listOfScenarios.add(
+                scenario.getStatus().name().toUpperCase() + " - " + scenario.getName()
+        );
+
+        if (scenario.isFailed()) {
+            // keep browser open for debugging
+            System.out.println("❌ Test failed - keeping browser open");
+        } else {
+            ApplicationManager.stop();
+        }
     }
 }
