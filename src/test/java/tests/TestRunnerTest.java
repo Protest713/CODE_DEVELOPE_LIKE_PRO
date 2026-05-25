@@ -10,6 +10,7 @@ import io.cucumber.testng.AbstractTestNGCucumberTests;
 import io.cucumber.testng.CucumberOptions;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import utils.AllureUtils;
 
 import java.util.ArrayList;
 
@@ -17,14 +18,17 @@ import java.util.ArrayList;
         features = "src/test/resources/features",
         glue = "tests",
         tags = "@CG",
-        plugin = {"pretty", "html:target/cucumber-reports.html"}
+        plugin = {
+                "pretty",
+                "io.qameta.allure.cucumber7jvm.AllureCucumber7Jvm"
+        }
 )
 public class TestRunnerTest extends AbstractTestNGCucumberTests {
 
     private PropertyFileReader localReader = new PropertyFileReader("local.properties");
     static ArrayList<String> listOfScenarios = new ArrayList<>();
 
-    // ✅ IMPORTANT: This makes Gradle detect tests
+    // ✅ Required for Gradle + TestNG
     @Override
     @Test(dataProvider = "scenarios")
     public void runScenario(io.cucumber.testng.PickleWrapper pickle,
@@ -32,8 +36,10 @@ public class TestRunnerTest extends AbstractTestNGCucumberTests {
         super.runScenario(pickle, feature);
     }
 
+    // ✅ Scenario start
     @Before
     public void startScenario(Scenario scenario) {
+
         System.out.println("🚀 Scenario started: " + scenario.getName());
 
         ApplicationManager.getWebDriver();
@@ -55,24 +61,24 @@ public class TestRunnerTest extends AbstractTestNGCucumberTests {
         HelperBase.screenShotSwitch = shouldCapture;
     }
 
-    @Override
-    @DataProvider(parallel = false)
-    public Object[][] scenarios() {
-        return super.scenarios();
-    }
-
+    // ✅ Scenario end
     @After
     public void endScenario(Scenario scenario) {
+
+        if (scenario.isFailed()) {
+            AllureUtils.takeScreenshot();   // 🔥 Screenshot in Allure
+        }
+
+        ApplicationManager.stop();
 
         listOfScenarios.add(
                 scenario.getStatus().name().toUpperCase() + " - " + scenario.getName()
         );
+    }
 
-        if (scenario.isFailed()) {
-            // keep browser open for debugging
-            System.out.println("❌ Test failed - keeping browser open");
-        } else {
-            ApplicationManager.stop();
-        }
+    @Override
+    @DataProvider(parallel = false)
+    public Object[][] scenarios() {
+        return super.scenarios();
     }
 }
