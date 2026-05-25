@@ -11,6 +11,7 @@ import io.cucumber.testng.CucumberOptions;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import utils.AllureUtils;
+import utils.ScreenshotUtil;
 
 import java.util.ArrayList;
 
@@ -62,11 +63,25 @@ public class TestRunnerTest extends AbstractTestNGCucumberTests {
     }
 
     // ✅ Scenario end
+//    @After
+//    public void endScenario(Scenario scenario) {
+//
+//        if (scenario.isFailed()) {
+//            AllureUtils.takeScreenshot();   // 🔥 Screenshot in Allure
+//        }
+//
+//        ApplicationManager.stop();
+//
+//        listOfScenarios.add(
+//                scenario.getStatus().name().toUpperCase() + " - " + scenario.getName()
+//        );
+//    }
+
     @After
     public void endScenario(Scenario scenario) {
 
         if (scenario.isFailed()) {
-            AllureUtils.takeScreenshot();   // 🔥 Screenshot in Allure
+            ScreenshotUtil.takeScreenshot();
         }
 
         ApplicationManager.stop();

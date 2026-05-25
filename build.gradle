@@ -1,6 +1,7 @@
 plugins {
     id 'java'
-    id "io.qameta.allure" version "2.11.2"
+//    id 'io.qameta.allure' version '2.11.2'
+    id "io.qameta.allure" version "2.12.0"
 }
 
 group = 'org.example'
@@ -23,40 +24,75 @@ dependencies {
     testImplementation 'io.cucumber:cucumber-testng:7.16.0'
     testImplementation 'org.testng:testng:7.8.0'
 
-    // 🔥 ALLURE
+    // =========================
+    // ALLURE REPORTING
+    // =========================
     testImplementation 'io.qameta.allure:allure-cucumber7-jvm:2.24.0'
     testImplementation 'io.qameta.allure:allure-testng:2.24.0'
+    implementation 'io.qameta.allure:allure-java-commons:2.24.0'
 
-    // Logging fix
+    // Logging
     testImplementation 'org.slf4j:slf4j-simple:2.0.9'
 
     // Utilities
     implementation 'commons-codec:commons-codec:1.15'
     implementation 'commons-io:commons-io:2.8.0'
 
-    // DB (optional)
+    // Database
     implementation 'mysql:mysql-connector-java:8.0.33'
     implementation 'org.springframework:spring-jdbc:5.3.30'
     implementation 'org.apache.commons:commons-dbcp2:2.9.0'
 }
 
+//tasks.register('runTests') {
+//    group = "verification"
+//    description = "Runs all tests"
+//    dependsOn test
+//}
+
 tasks.register('runTests') {
+
     group = "verification"
     description = "Runs all tests"
+
     dependsOn test
+
+    finalizedBy allureReport
 }
 
 test {
+
     useTestNG()
 
+    // Allure Results Path
+    systemProperty "allure.results.directory",
+            file("$buildDir/allure-results")
+
+    // Detailed logs
     testLogging {
-        events "passed", "failed", "skipped"
+
+        events "PASSED", "FAILED", "SKIPPED"
+
+        exceptionFormat "FULL"
+
+        showExceptions true
+        showCauses true
+        showStackTraces true
+
         showStandardStreams = true
     }
 }
 
 allure {
+
     version = '2.24.0'
+
+    useTestNG {
+        version = '2.24.0'
+    }
+
+    autoconfigure = true
+    aspectjweaver = true
 }
 
 java {
