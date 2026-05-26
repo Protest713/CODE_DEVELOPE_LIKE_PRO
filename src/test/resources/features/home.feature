@@ -1,7 +1,7 @@
-Feature: Login Functionality
+Feature: home Functionality
 
-
-  Scenario Outline: validate home page functionality
+  @CG
+  Scenario Outline: validate login functionality to the application
     Given user launch the application
 #    Then user navigates to home screen
     Examples:
